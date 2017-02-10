@@ -1,0 +1,79 @@
+﻿<div style="padding-top:10px;">
+    <div id="Layout" style="font-family:Arial; width:100%">
+        <div style="float:left; font-size:x-large; vertical-align:middle">
+            FinBox
+        </div>
+        <div style="float:right; padding-left:10px; vertical-align:middle; height:40px">
+            <input type="submit" value="Logout" onclick="logout();" onkeypress="logout();" style="color:blue; background:none; width:100%; height:25px; font-size:large; border:none; cursor:pointer; text-decoration:underline">
+        </div>
+        <div style="float:right">
+            <div style="text-align:center">
+                <label id="username">name</label>
+            </div>
+            <div style="text-align:center">
+                <label id="email">email address</label>
+            </div>
+        </div>
+    </div>
+</div>
+<br /><br />
+<div>
+    <hr />
+</div>
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+<script type="text/javascript">
+    var urilogout = 'api/logout'
+
+    var user = {
+        firstname: "", lastname: "", email: "", password: ""
+    }
+
+    function logout() {
+        // clear token
+        $.ajax({
+            url: urilogout,
+            type: 'POST',
+            data: JSON.stringify(user),
+            dataType: 'json',
+            contentType: "application/json",
+            success: function (data) {
+                // redirect to login
+                writeCookie("userid", "", -1);
+                location.assign("/Finovex/Login.cshtml");
+            },
+            error: function (error) {
+                alert(error.responseText);
+            }
+        });
+
+    }
+
+    function writeCookie(name, value, days) {
+        var date, expires;
+        if (days) {
+            date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toGMTString();
+        } else {
+            expires = "";
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
+    }
+
+    function readCookie(name) {
+        var i, c, ca, nameEQ = name + "=";
+        ca = document.cookie.split(';');
+        for (i = 0; i < ca.length; i++) {
+            c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1, c.length);
+            }
+            if (c.indexOf(nameEQ) == 0) {
+                return c.substring(nameEQ.length, c.length);
+            }
+        }
+        return '';
+    }
+
+</script>

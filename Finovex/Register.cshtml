@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+</head>
+<body style="font-family:Arial;">
+    @RenderPage("~/Layout/_LayoutUnlogged.cshtml")
+    <div  width="100%" style="padding-top:40px; font-size:x-large; text-align:center; font-weight:200">
+        Register for a new account
+    </div>
+    <div id="registerdiv" style="padding-left:45%; width:10%; font-size:small">
+        <div id="firstnamediv" style="padding-top:20px; width:100%">
+            <label for="firstname">First Name <span style="color:red">*</span></label><div></div>
+            <input type="text" name="firstname" id="firstname" required/>
+        </div>
+        <div id="lastnamediv" style="padding-top:10px; width:100%">
+            <label for="lastname">Last Name <span style="color:red">*</span></label><div></div>
+            <input type="text" name="lastname" id="lastname" required/>
+        </div>
+        <div id="emaildiv" style="padding-top:10px; width:100%">
+            <label for="email">Email address <span style="color:red">*</span></label><div></div>
+            <input type="email" name="email" id="email" required/>
+        </div>
+        <div id="passworddiv" style="padding-top:10px; width:100%">
+            <label for="password">Password <span style="color:red">*</span></label><div></div>
+            <input type="password" name="password" id="password" required/>
+        </div>
+        <div style="padding-top:10px;"><span style="color:red">*</span> denotes required fields</div>
+        <div id="submitdiv" style="padding-top:10px; width:100%">
+            <input type="submit" id="registerbutton" value="Register" onclick="register();" onkeypress="register();" style="background-color:darkseagreen; width:100%; height:25px; font-size:large" />
+        </div>
+    </div>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript">
+    var uri = 'api/users'
+
+    function register() {
+        // Get values
+        var firstname = document.getElementById("firstname").value;
+        var lastname = document.getElementById("lastname").value;
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+
+        //// Validate
+        //if (!validate(firstname,lastname,email,password))
+        //{ alert("VALIDATION FAILED!"); return false; }
+
+
+        // Call Add user API
+        var user = {
+            firstname: firstname, lastname: lastname, email: email, password: password
+        }
+
+        $.ajax({
+            url: uri,
+            type: 'POST',
+            data: JSON.stringify(user),
+            dataType: 'json',
+            contentType: "application/json",
+            success: function (data) {
+                // Redirect to reg success page
+                location.assign("/Finovex/RegisterWelcome.cshtml?firstname=" + firstname + "&lastname=" + lastname);
+            },
+            error: function (error) {
+                alert(error.responseText);
+            }
+        });
+
+        return false;
+    }
+
+    function validate(firstname,lastname,email,password) {
+        if (firstname != "" && lastname != "" && email != "" && password != "")
+        { return true; }
+
+        return false;
+    }
+    </script>
+</body>
+</html>

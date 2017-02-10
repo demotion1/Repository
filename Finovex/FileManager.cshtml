@@ -1,0 +1,655 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>This is a page</title>
+	<meta charset="utf-8" />
+    <style>
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+            .close:hover,
+            .close:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
+    </style>
+    <script>
+        // check if logged in
+        if (document.cookie.indexOf("userid") == -1)
+        {
+            location.assign("/Finovex/Login.cshtml");
+        }
+    </script>
+</head>
+<body>
+    @RenderPage("~/Layout/_Layout.cshtml")
+    <div style="width:100%; padding-top:10px">
+        <div style="float:left">List of Files</div>
+        <div style="float:right">
+            <input type="submit" value="+ Upload new File" onclick="upload();" onkeypress="upload();" style="color:blue; background:none; width:100%; height:25px; font-size:large; border:none; cursor:pointer; text-decoration:underline">
+        </div>
+    </div>
+    <div id="filesdiv" style="padding-top:20px">
+    </div>
+    <!-- Popups -->
+    <div id="AddFile" class="modal">
+
+        <div class="modal-content">
+            <div>
+                <span class="close">&times;</span>
+            </div>
+            <div style="text-align:center; padding-top:20px">
+                <h2>UPLOAD FILE</h2>
+            </div>
+            <div style="padding-top:20px">
+                <label for="filename">Name of File</label><div></div>
+                <input type="text" name="filename" id="filename" style="width:80%" />
+            </div>
+            <div style="padding-top:20px">
+                <label for="fileselect">File to Upload</label><div></div>
+                <input type="text" name="fileupload" id="fileupload" style="width:80%" />
+                <input type="file" id="selectedFile" style="display: none;" onchange="uploadOnChange();" />
+                <input type="button" value="Browse" onclick="document.getElementById('selectedFile').click();" />
+                <textarea id="textAreaFileContents" hidden="hidden"></textarea>
+            </div>
+            <div style="padding-top:20px; text-align:center">
+                <input type="submit" id="uploadfilebtn" value="UPLOAD" onclick="uploadfile();" onkeypress="uploadfile();" style="background-color:blue; color:white; width:150px; height:40px; font-size:large" />
+                <input type="submit" id="canceluploadbtn" value="CANCEL" onclick="new function(){var modal = document.getElementById('AddFile');modal.style.display = 'none';}" style="background-color:blue; color:white; width:150px; height:40px; font-size:large" />
+            </div>
+        </div>
+
+    </div>
+    <div id="DeleteFile" class="modal">
+
+        <div class="modal-content">
+            <div>
+                <span class="close">&times;</span>
+            </div>
+            <div style="text-align:center; padding-top:20px">
+                <h2>PLEASE CONFIRM DELETION</h2>
+            </div>
+            <div style="text-align:center; padding-top:20px">
+                <h3>File to delete</h3>
+            </div>
+            <div style="padding-top:20px; text-align:center; color:blue">
+                <label id="filedelete"></label>
+                <label id="fileiddelete" hidden="hidden"></label>
+            </div>
+            <div style="padding-top:20px; text-align:center">
+                <input type="submit" id="deletefilebtn" value="DELETE" onclick="deletefile();" onkeypress="deletefile();" style="background-color:blue; color:white; width:150px; height:40px; font-size:large" />
+                <input type="submit" id="canceldeletebtn" value="CANCEL" onclick="new function () { var modal = document.getElementById('DeleteFile'); modal.style.display = 'none'; }" style="background-color:blue; color:white; width:150px; height:40px; font-size:large" />
+            </div>
+        </div>
+
+    </div>
+    <div id="UpdateFile" class="modal">
+
+        <div class="modal-content">
+            <div>
+                <span class="close">&times;</span>
+            </div>
+            <div style="text-align:center; padding-top:20px">
+                <h2>UPDATE FILE</h2>
+            </div>
+            <div style="padding-top:20px">
+                <label>File to update</label><div></div>
+                <label id="filetoupdate" style="color:blue"></label>
+                <label id="fileidtoupdate" hidden="hidden"></label>
+            </div>
+            <div style="padding-top:20px">
+                <label for="fileselectupdate">File to Upload</label><div></div>
+                <input type="text" name="fileuploadupdate" id="fileuploadupdate" style="width:80%" />
+                <input type="file" id="selectedFileupdate" style="display: none;" onchange="uploadOnChangeUpdate();" />
+                <input type="button" value="Browse" onclick="document.getElementById('selectedFileupdate').click();" />
+                <textarea id="textAreaUpdateContents" hidden="hidden"></textarea>
+            </div>
+            <div style="padding-top:20px; text-align:center">
+                <input type="submit" id="updatefilebtn" value="UPDATE" onclick="updatefile();" onkeypress="updatefile();" style="background-color:blue; color:white; width:150px; height:40px; font-size:large" />
+                <input type="submit" id="cancelupdatebtn" value="CANCEL" onclick="new function () { var modal = document.getElementById('UpdateFile'); modal.style.display = 'none'; }" style="background-color:blue; color:white; width:150px; height:40px; font-size:large" />
+            </div>
+        </div>
+
+    </div>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        var uri = 'api/files';
+
+        function uploadfile() {
+            
+            var files = document.getElementById('selectedFile').files;
+            var filename = document.getElementById('filename').value;
+            var mime = document.getElementById('selectedFile').files[0].type;
+            var filesize = document.getElementById('selectedFile').files[0].size;
+
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+
+                    data = document.getElementById('textAreaFileContents').value;
+                    userid = readCookie("userid");
+
+                    $.ajax({
+                        type: "POST",
+                        url: uri + '?filename=' + filename + '&mimeType=' + mime + '&filesize=' + filesize + '&userid=' + userid,
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (result) {
+                            //alert(result);
+                            loadGrid();
+                        },
+                        error: function (error) {
+                            alert(error.responseText);
+                        }
+                    });
+                } else {
+                    alert("This browser doesn't support HTML5 file uploads!");
+                }
+            }
+
+            // close the modal
+            var modal = document.getElementById('AddFile');
+            modal.style.display = "none";
+
+            return false;
+        }
+
+        function updatefile() {
+
+            var files = document.getElementById('selectedFileupdate').files; 
+            var fileid = document.getElementById('fileidtoupdate').innerHTML;
+            var mime = document.getElementById('selectedFileupdate').files[0].type;
+            var filesize = document.getElementById('selectedFileupdate').files[0].size;
+
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+
+                    data = document.getElementById('textAreaUpdateContents').value;
+                    userid = readCookie("userid");
+
+                    $.ajax({
+                        type: "PATCH",
+                        url: uri + '?fileid=' + fileid + '&mimeType=' + mime + '&filesize=' + filesize + '&userid=' + userid,
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (result) {
+                            //alert(result);
+                            loadGrid();
+                        },
+                        error: function (error) {
+                            alert(error.responseText);
+                        }
+                    });
+                } else {
+                    alert("This browser doesn't support HTML5 file uploads!");
+                }
+            }
+
+            // close the modal
+            var modal = document.getElementById('UpdateFile');
+            modal.style.display = "none";
+
+            return false;
+        } 
+
+        function deletefile() {
+
+            var fileidtodelete = document.getElementById('fileiddelete').innerHTML;
+
+            if (window.FormData !== undefined) {
+
+                $.ajax({
+                    url: uri + '/' + fileidtodelete,
+                    type: "DELETE",
+                    dataType: 'json',
+                    success: function (data) {
+                        //alert(textStatus);
+                        loadGrid();
+                    },
+                    error: function (error) {
+                        alert(error.responseText);
+                    }
+                });
+            } else {
+                alert("This browser doesn't support HTML5 file uploads!");
+            }
+
+            // close the modal
+            var modal = document.getElementById('DeleteFile');
+            modal.style.display = "none";
+
+            return false;
+        }
+
+        $(document).ready(function () {
+
+            // get user info
+            var userid = readCookie("userid");
+
+            $.ajax({
+                type: "GET",
+                url: 'api/me?userid=' + userid,
+                contentType: false,
+                processData: false,
+                result: "application/json",
+                success: function (result) {
+                    if (result.length == 1) {
+                        var uname = document.getElementById('username');
+                        uname.innerHTML = result[0]["firstname"] + " " + result[0]["lastname"];
+                        var uemail = document.getElementById('email');
+                        uemail.innerHTML = "(" + result[0]["email"] + ")";
+                    };
+                },
+                error: function (error) {
+                    alert(error.responseText);
+                }
+            });
+
+            loadGrid();
+    });
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    function upload() {
+
+        // Get the modal
+        var modal = document.getElementById('AddFile');
+
+        modal.style.display = "block";
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        return false;
+    } 
+    
+    function uploadOnChange() {
+        var filename = document.getElementById('selectedFile').value;
+        var lastIndex = filename.lastIndexOf("\\");
+        if (lastIndex >= 0) {
+            filename = filename.substring(lastIndex + 1);
+        }
+        document.getElementById('fileupload').value = filename; 
+        document.getElementById('filename').value = filename;
+
+        // Save base64 file
+        var fileToLoad = document.getElementById("selectedFile").files[0];
+        var fileReader = new FileReader();
+
+        fileReader.onload = function (fileLoadedEvent) {
+            var textAreaFileContents = document.getElementById
+            (
+                "textAreaFileContents"
+            );
+
+            textAreaFileContents.innerHTML = fileLoadedEvent.target.result;
+        };
+
+        fileReader.readAsDataURL(fileToLoad);
+    }
+
+    function uploadOnChangeUpdate() {
+
+        var filename = document.getElementById('selectedFileupdate').value;
+        var lastIndex = filename.lastIndexOf("\\");
+        if (lastIndex >= 0) {
+            filename = filename.substring(lastIndex + 1);
+        }
+        document.getElementById('fileuploadupdate').value = filename;
+
+        // Save base64 file
+        var fileToLoad = document.getElementById("selectedFileupdate").files[0];
+        var fileReader = new FileReader();
+
+        fileReader.onload = function (fileLoadedEvent) {
+            var textAreaFileContents = document.getElementById
+            (
+                "textAreaUpdateContents"
+            );
+
+            textAreaFileContents.innerHTML = fileLoadedEvent.target.result;
+        };
+
+        fileReader.readAsDataURL(fileToLoad);
+    }
+
+    function loadGrid() {
+        // Send an AJAX request
+        $.getJSON(uri)
+            .done(function (data) {
+                // On success, 'data' contains a list of files.
+                // EXTRACT VALUE FOR HTML HEADER. 
+                var col = [];
+                for (var i = 0; i < data.length; i++) {
+                    for (var key in data[i]) {
+                        if (col.indexOf(key) === -1) {
+                            col.push(key);
+                        }
+                    }
+                }
+
+                // CREATE DYNAMIC TABLE.
+                var table = document.createElement("table");
+                table.style.width = "100%";
+                table.style.border = "solid";
+                table.style.borderWidth = "thin";
+                table.cellSpacing = "0";
+
+                // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+
+                var tr = table.insertRow(-1);                   // TABLE ROW.
+                tr.style.backgroundColor = "lightgrey";
+
+                // Add Headers
+                var th = document.createElement("th");
+                th.innerHTML = "fileid";
+                th.hidden = true;
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "File Name";
+                th.hidden = false;
+                th.style.textAlign = "center";
+                th.style.borderRight = "solid";
+                th.style.borderWidth = "thin";
+                th.width = "15%";
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "Creation Date";
+                th.hidden = false;
+                th.style.textAlign = "center";
+                th.style.borderRight = "solid";
+                th.style.borderWidth = "thin";
+                th.width = "10%";
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "Modified Date";
+                th.hidden = false;
+                th.style.textAlign = "center";
+                th.style.borderRight = "solid";
+                th.style.borderWidth = "thin";
+                th.width = "10%";
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "MIME Type";
+                th.hidden = false;
+                th.style.textAlign = "center";
+                th.style.borderRight = "solid";
+                th.style.borderWidth = "thin";
+                th.width = "20%";
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "File Size";
+                th.hidden = false;
+                th.style.textAlign = "center";
+                th.style.borderRight = "solid";
+                th.style.borderWidth = "thin";
+                th.width = "10%";
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "fileUser";
+                th.hidden = true;
+                tr.appendChild(th);
+
+                th = document.createElement("th");
+                th.innerHTML = "Actions";
+                th.hidden = false;
+                th.width = "35%";
+                tr.appendChild(th);
+
+                // set alternative color
+                var altColor = "lemonchiffon";
+
+                // Add Rows
+                for (var i = 0; i < data.length; i++) {
+
+                    tr = table.insertRow(-1);
+                    tr.style.backgroundColor = altColor;
+
+                    // set alternative color
+                    if (altColor == "lemonchiffon")
+                    { altColor = "white"; }
+                    else
+                    { altColor = "lemonchiffon"; }
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = data[i]["fileid"];
+                    tabCell.hidden = true;
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = data[i]["filename"];
+                    tabCell.hidden = false;
+                    tabCell.style.borderRight = "solid";
+                    tabCell.style.borderWidth = "thin";
+                    tabCell.style.padding = "3px";
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = formatDate(new Date(data[i]["creationdDate"]));
+                    tabCell.hidden = false;
+                    tabCell.style.textAlign = "center";
+                    tabCell.style.borderRight = "solid";
+                    tabCell.style.borderWidth = "thin";
+                    tabCell.style.padding = "3px";
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = formatDate(new Date(data[i]["modificationDate"]));
+                    tabCell.hidden = false;
+                    tabCell.style.textAlign = "center";
+                    tabCell.style.borderRight = "solid";
+                    tabCell.style.borderWidth = "thin";
+                    tabCell.style.padding = "3px";
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = data[i]["mimeType"];
+                    tabCell.hidden = false;
+                    tabCell.style.borderRight = "solid";
+                    tabCell.style.borderWidth = "thin";
+                    tabCell.style.padding = "3px";
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = data[i]["filesize"];
+                    tabCell.hidden = false;
+                    tabCell.style.borderRight = "solid";
+                    tabCell.style.borderWidth = "thin";
+                    tabCell.style.padding = "3px";
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    tabCell.innerHTML = data[i]["fileUser"];
+                    tabCell.hidden = true;
+                    tr.appendChild(tabCell);
+
+                    var tabCell = tr.insertCell(-1);
+                    // Add buttons
+                    // delete
+                    var btn = document.createElement('input');
+                    btn.id = "delete" + i;
+                    btn.type = "button";
+                    btn.value = "delete";
+                    btn.onclick = function () { // set onclick handler
+                        // Get the modal
+                        var modal = document.getElementById('DeleteFile');
+
+                        modal.style.display = "block";
+
+                        // Get the <span> element that closes the modal
+                        var span = document.getElementsByClassName("close")[1];
+
+                        // When the user clicks on <span> (x), close the modal
+                        span.onclick = function () {
+                            modal.style.display = "none";
+                        }
+
+                        // When the user clicks anywhere outside of the modal, close it
+                        window.onclick = function (event) {
+                            if (event.target == modal) {
+                                modal.style.display = "none";
+                            }
+                        }
+
+                        // save the selected file name and id
+                        var labelname = document.getElementById('filedelete');
+                        labelname.innerText = this.parentNode.parentNode.cells[1].innerHTML;
+                        var labelname = document.getElementById('fileiddelete');
+                        labelname.innerText = this.parentNode.parentNode.cells[0].innerHTML;
+
+                        return false;
+                    }
+                    btn.style.color = "blue";
+                    btn.style.background = "none";
+                    btn.style.height = "25px";
+                    btn.style.fontSize = "large";
+                    btn.style.border = "none";
+                    btn.style.cursor = "pointer";
+                    btn.style.textDecoration = "underline";
+                    tabCell.appendChild(btn);
+                    // update
+                    btn = document.createElement('input');
+                    btn.id = "update" + i;
+                    btn.type = "button";
+                    btn.value = "update";
+                    btn.onclick = function () {
+                        // Get the modal
+                        var modal = document.getElementById('UpdateFile');
+
+                        modal.style.display = "block";
+
+                        // Get the <span> element that closes the modal
+                        var span = document.getElementsByClassName("close")[2];
+
+                        // When the user clicks on <span> (x), close the modal
+                        span.onclick = function () {
+                            modal.style.display = "none";
+                        }
+
+                        // When the user clicks anywhere outside of the modal, close it
+                        window.onclick = function (event) {
+                            if (event.target == modal) {
+                                modal.style.display = "none";
+                            }
+                        }
+
+                        // save the selected file name and id
+                        var labelname = document.getElementById('filetoupdate');
+                        labelname.innerText = this.parentNode.parentNode.cells[1].innerHTML;
+                        var labelname = document.getElementById('fileidtoupdate');
+                        labelname.innerText = this.parentNode.parentNode.cells[0].innerHTML;
+
+                        return false;
+                    }
+                    btn.style.color = "blue";
+                    btn.style.background = "none";
+                    btn.style.height = "25px";
+                    btn.style.fontSize = "large";
+                    btn.style.border = "none";
+                    btn.style.cursor = "pointer";
+                    btn.style.textDecoration = "underline";
+                    tabCell.appendChild(btn);
+                    // download
+                    btn = document.createElement('input');
+                    btn.id = "download" + i;
+                    btn.type = "button";
+                    btn.value = "download";
+                    btn.onclick = function () {
+                        // Get the file
+                        $.ajax({
+                            type: "GET",
+                            url: uri + '?filename=' + this.parentNode.parentNode.cells[1].innerHTML + '&mimeType' + this.parentNode.parentNode.cells[4].innerHTML,
+                            contentType: false,
+                            processData: false,
+                            success: function (result) {
+                            },
+                            error: function (error) {
+                                alert(error.responseText);
+                            }
+                        });
+
+                        return false;
+                    }
+                    btn.style.color = "blue";
+                    btn.style.background = "none";
+                    btn.style.height = "25px";
+                    btn.style.fontSize = "large";
+                    btn.style.border = "none";
+                    btn.style.cursor = "pointer";
+                    btn.style.textDecoration = "underline";
+                    tabCell.appendChild(btn);
+                    tabCell.hidden = false;
+                    tr.appendChild(tabCell);
+                }
+
+                // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+                var divContainer = document.getElementById("filesdiv");
+                divContainer.innerHTML = "";
+                divContainer.appendChild(table);
+            });
+    }
+
+    </script>
+</body>
+</html>

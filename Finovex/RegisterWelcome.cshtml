@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+</head>
+<body style="font-family:Arial;">
+    @RenderPage("~/Layout/_LayoutUnlogged.cshtml")
+    <div id="registerdiv" width="100%" style="padding-top:40px; font-size:x-large; text-align:center; font-weight:200">
+        <label for="fullname"></label>
+        <div>
+            <a href="Login.cshtml" style="color:blue"><u>Log in to your account</u></a>
+        </div>
+    </div>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+
+    $(document).ready(function () {
+        // get parameters
+        var firstname = getParameterByName("firstname");
+        var lastname = getParameterByName("lastname");
+
+        // set welcome message
+        $("label[for='fullname']").text("Welcome " + firstname + ", " + lastname);
+    });
+
+    function getParameterByName(name, url) {
+        if (!url) {
+            url = window.location.href;
+        }
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+    </script>
+
+</body>
+</html>
